@@ -506,7 +506,14 @@ Namespace SIS.TA
         Header = Header & sb.ToString
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
@@ -707,7 +714,14 @@ Namespace SIS.TA
         Header = Header & sb.ToString
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
@@ -764,7 +778,14 @@ Namespace SIS.TA
         Header = Header & RenderControlToHtml(SIS.TA.taBH.GetTABillPanel(oTA.TABillNo, True, False))
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try

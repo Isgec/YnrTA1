@@ -25,9 +25,9 @@ Partial Class GF_taCH
           SIS.TA.taCH.HoldWF(TABillNo)
           GVtaCH.DataBind()
         End If
-        Dim message As String = New JavaScriptSerializer().Serialize(oTA.GetHoldNotesLink)
-        Dim script As String = String.Format("show_holdnotes({0});", message)
-        ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
+        'Dim message As String = New JavaScriptSerializer().Serialize(oTA.GetHoldNotesLink)
+        'Dim script As String = String.Format("show_holdnotes({0});", message)
+        'ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", script, True)
       Catch ex As Exception
         Dim message As String = New JavaScriptSerializer().Serialize(ex.Message)
         Dim script As String = String.Format("alert({0});", message)

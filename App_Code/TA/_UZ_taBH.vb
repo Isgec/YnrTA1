@@ -196,7 +196,7 @@ Namespace SIS.TA
         End If
       End If
       'In Foreign Travel, It is mandatory to Enter Finance Source
-      If Results.TravelTypeID <> TATravelTypeValues.Domestic AndAlso Results.TravelTypeID <> TATravelTypeValues.HomeVisit Then
+      If Results.TravelTypeID = TATravelTypeValues.ForeignSiteVisit Or Results.TravelTypeID = TATravelTypeValues.ForeignTravel Then
         Dim sTmps As List(Of SIS.TA.taBDFinance) = SIS.TA.taBDFinance.taBDFinanceSelectList(0, 999, "", False, "", Results.TABillNo)
         If sTmps.Count <= 0 Then
           Throw New Exception("Source of Finance entry NOT found. Can NOT forward. Pl. enter it first.")
@@ -213,12 +213,6 @@ Namespace SIS.TA
       End If
       Dim selfApproval As Boolean = Results.FK_TA_Bills_EmployeeID.TASelfApproval
       Dim sendMail As Boolean = False
-      Try
-        If Not AllreadySubmittedCheck(Results) Then
-          Return Results
-        End If
-      Catch ex As Exception
-      End Try
       'Check Values in Last Approved TA Bill
       Dim IsValueChanged As Integer = TAValueChanged.Fresh
       '0=Last Submitted TA Bill Not Found
@@ -307,7 +301,10 @@ Namespace SIS.TA
       Results = SIS.TA.taBH.UpdateData(Results)
       '======Send EMail=========
       If sendMail Then
-        SendEMail(Results)
+        Dim errmsg As String = SendEMail(Results)
+        If errmsg <> "" Then
+          Throw New Exception(errmsg)
+        End If
       End If
       '=========================
       Return Results
@@ -320,6 +317,7 @@ Namespace SIS.TA
       Dim teDt As DateTime = Convert.ToDateTime(tmp.EndDateTime).AddHours(-1 * GraceHrs)
       Dim sTmps As List(Of SIS.TA.taBH) = SIS.TA.taBH.UZ_taBHSelectListForEmployee(0, 999, "", False, "", 0, "", "", 0, tmp.EmployeeID)
       For Each sTmp As SIS.TA.taBH In sTmps
+        If sTmp.TABillNo = tmp.TABillNo Then Continue For
         Select Case sTmp.BillStatusID
           Case TAStates.Free,
                TAStates.ReturnedByAccounts,
@@ -328,6 +326,7 @@ Namespace SIS.TA
                TAStates.ReturnedBySanctioningAuthority
             Continue For
         End Select
+        If sTmp.StartDateTime = "" Or sTmp.EndDateTime = "" Then Continue For
         Dim ssDt As DateTime = Convert.ToDateTime(sTmp.StartDateTime)
         Dim seDt As DateTime = Convert.ToDateTime(sTmp.EndDateTime)
         If (tsDt >= ssDt And tsDt <= seDt) Then
@@ -585,7 +584,7 @@ Namespace SIS.TA
         Dim stDT As String = ""
         Dim enDT As String = ""
         Dim ci As System.Globalization.CultureInfo = SIS.SYS.Utilities.SessionManager.ci
-        If TravelTypeID = TATravelTypeValues.Domestic Then
+        If TravelTypeID = TATravelTypeValues.Domestic Or TravelTypeID = TATravelTypeValues.LocalTravel Then
           Try
             Dim tmpHrs As Integer = DateDiff(DateInterval.Hour, Convert.ToDateTime(StartDateTime, ci), Convert.ToDateTime(EndDateTime, ci))
             Dim tmpDays As Integer = tmpHrs \ 24
@@ -766,6 +765,15 @@ Namespace SIS.TA
                 'Consider Returning Start Time for same day visit
                 eDt = sTmp.Date1Time
               End If
+            Case TAComponentTypes.Lodging
+              If Not tmpInitialized Then
+                sDt = sTmp.Date1Time
+                eDt = sTmp.Date2Time
+                tmpInitialized = True
+              Else
+                If sDt > sTmp.Date1Time Then sDt = sTmp.Date1Time
+                If eDt < sTmp.Date2Time Then eDt = sTmp.Date2Time
+              End If
           End Select
         Next
         If DateDiff(DateInterval.Hour, sDt, eDt) <= 24 Then
@@ -799,13 +807,13 @@ Namespace SIS.TA
                     Select Case sTmp.ModeTravelID
                       Case "9", "15" 'Taxi, OwnCar
                         If sTmp.AmountInINR > 0 Then
-                          If sTmp.ModeTravelID = "9" Then
-                            With sTmp
-                              .OOEBySystem = True
-                              .OOERemarks = "Taxi requires Special Approval."
-                            End With
-                          Else
-                            If sBill.TACategoryID > 7 Then 'Below Manager
+                          'If sTmp.ModeTravelID = "9" Then
+                          '  With sTmp
+                          '    .OOEBySystem = True
+                          '    .OOERemarks = "Taxi requires Special Approval."
+                          '  End With
+                          'Else
+                          If sBill.TACategoryID > 7 Then 'Below Manager
                               With sTmp
                                 If .AmountInINR > 0 Then
                                   .OOEBySystem = True
@@ -813,7 +821,7 @@ Namespace SIS.TA
                                 End If
                               End With
                             End If
-                          End If
+                          ''End If
                         End If
                       Case Else
                         If Convert.ToInt32(sTmp.FK_TA_BillDetails_ModeTravelID.Sequence) < Convert.ToInt32(tmp.FK_TA_D_TravelModes_TravelModeID.Sequence) Then
@@ -1110,6 +1118,10 @@ Namespace SIS.TA
               CreateOtherDARecord(sBill, OtherDADays)
             End If
           End If
+        ElseIf sBill.TravelTypeID = TATravelTypeValues.LocalTravel Then
+          If sBill.TotalTravelDays > 0 Then
+            CreateLocalTravelDARecord(sBill)
+          End If
         Else
           Dim oSDs As List(Of StayedDestination) = StayedDestination.GetStayedDestinations(sTmps)
           Dim OtherDADays As Decimal = sBill.TotalTravelDays - CreateDARecords(oSDs, sBill, sBill.TotalTravelDays)
@@ -1119,6 +1131,46 @@ Namespace SIS.TA
         End If
       End If
     End Sub
+    'CreateLocalTravelDARecord
+    Private Shared Sub CreateLocalTravelDARecord(ByVal sBill As SIS.TA.taBH)
+      Dim daDays As Decimal = sBill.TotalTravelDays
+      Dim ci As System.Globalization.CultureInfo = SIS.SYS.Utilities.SessionManager.ci
+      Dim sTmp As New SIS.TA.taBillDetails
+      With sTmp
+        .TABillNo = sBill.TABillNo
+        .AutoCalculated = True
+        .SerialNo = 0
+        .ProjectID = .FK_TA_BillDetails_TABillNo.ProjectID
+        .CostCenterID = .FK_TA_BillDetails_TABillNo.CostCenterID
+        .CurrencyID = .FK_TA_BillDetails_TABillNo.BillCurrencyID
+        .ConversionFactorINR = .FK_TA_BillDetails_TABillNo.ConversionFactorINR
+        .CityTypeID = "OTHERS"
+        .NotStayedAnyWhere = True
+        .Date1Time = sBill.StartDateTime
+        .Date2Time = sBill.EndDateTime
+        .ComponentID = TAComponentTypes.DA
+        .AmountFactor = daDays
+        .AmountTax = 0
+        .AmountRate = 0
+      End With
+      If sBill.SanctionedDA > 0 Then
+        sTmp.AmountRate = sBill.SanctionedDA
+        sTmp.SystemText = "Sanctioned DA, for Local Travel duration " & sTmp.AmountFactor & " day(s) @ " & sTmp.AmountRate & " Duration " & sTmp.Date1Time & " - " & sTmp.Date2Time
+      Else
+        Dim tmp As SIS.TA.taD_LocalTravel = SIS.TA.taD_LocalTravel.GetByCategoryID(Convert.ToInt32(sBill.TACategoryID), Convert.ToDateTime(sBill.StartDateTime, ci))
+        If tmp IsNot Nothing Then
+          sTmp.AmountRate = tmp.TravelDA
+        Else
+          With sTmp
+            .AmountRate = 0
+            .OOERemarks = "Local Travel [100 Km] DA NOT found."
+          End With
+        End If
+        sTmp.SystemText = "Local Travel [within 100 Km] DA, for Travel duration " & sTmp.AmountFactor & " day(s) @ " & sTmp.AmountRate & " Duration " & sTmp.Date1Time & " - " & sTmp.Date2Time
+      End If
+      SIS.TA.taBillDetails.UZ_taBillDetailsInsert(sTmp)
+    End Sub
+
     Private Shared Sub CreateOtherDARecord(ByVal sBill As SIS.TA.taBH, ByVal daDays As Decimal)
       Dim ci As System.Globalization.CultureInfo = SIS.SYS.Utilities.SessionManager.ci
       Dim sTmp As New SIS.TA.taBillDetails
@@ -1145,7 +1197,7 @@ Namespace SIS.TA
       Else
         Dim CityTypeForDA As String = "OTHERS"
         Dim RegionID As String = "Others"
-        If sBill.TravelTypeID = TATravelTypeValues.Domestic Or sTmp.IsDomestic Then
+        If sBill.TravelTypeID = TATravelTypeValues.Domestic Or sBill.IsDomestic Then
           Dim tmp As SIS.TA.taD_SwrDA = SIS.TA.taD_SwrDA.GetByCategoryID(Convert.ToInt32(sBill.TACategoryID), CityTypeForDA, Convert.ToDateTime(sBill.StartDateTime, ci))
           If tmp IsNot Nothing Then
             sTmp.AmountRate = tmp.HotelStayDA
@@ -1312,7 +1364,7 @@ Namespace SIS.TA
             Else
               RegionID = sTmp.FK_TA_BillDetails_City1ID.RegionID
             End If
-            If sBill.TravelTypeID = TATravelTypeValues.Domestic Or sTmp.IsDomestic Then
+            If sBill.TravelTypeID = TATravelTypeValues.Domestic Or sBill.IsDomestic Then
               If sTmp.StayedInHotel Then
                 Dim tmp As SIS.TA.taD_SwrDA = SIS.TA.taD_SwrDA.GetByCategoryID(Convert.ToInt32(sBill.TACategoryID), CityTypeForDA, Convert.ToDateTime(sBill.StartDateTime, ci))
                 If tmp IsNot Nothing Then
@@ -1511,6 +1563,15 @@ Namespace SIS.TA
                 If Not sTmp.OOEBySystem Then
                   sTmp.OOERemarks = "Bill is required."
                 End If
+              End If
+              If sTmp.AmountInINR >= 1500 Then
+                Select Case sBill.TravelTypeID
+                  Case TATravelTypeValues.Domestic, TATravelTypeValues.HomeVisit
+                    With sTmp
+                      .OOEBySystem = True
+                      .OOERemarks = "Local Conveyance is 1500 or above, requires BH sanction."
+                    End With
+                End Select
               End If
             Else
               'Validation for Foreign Travel
@@ -1719,7 +1780,7 @@ Namespace SIS.TA
         Dim tmpCate As Integer = sBill.TACategoryID
         If tmpCate = 5 Then 'GM/DGM
           Try
-            If sBill.FK_TA_Bills_EmployeeID.C_DesignationID = 7 Then 'DGM
+            If sBill.FK_TA_Bills_EmployeeID.C_DesignationID = 21 Then 'DGM
               tmpCate = 6 'AGM
             End If
           Catch ex As Exception
@@ -1937,12 +1998,49 @@ Namespace SIS.TA
     End Sub
 
 #End Region
+    Public Property IsDomestic As Boolean = True
 #Region " VALIDATE TA BILL MAIN FUNCTION "
     Public Shared Sub ValidateTABill(ByVal TABillNo As Integer)
       InitializeTABill(TABillNo)
       Dim ci As System.Globalization.CultureInfo = SIS.SYS.Utilities.SessionManager.ci
       Dim sBill As SIS.TA.taBH = SIS.TA.taBH.taBHGetByID(TABillNo)
       Dim sTmps As List(Of SIS.TA.taBillDetails) = SIS.TA.taBillDetails.taBillDetailsSelectList(0, 999, "", False, "", TABillNo)
+      '0=Check IsDomestic at Bill Level
+      Select Case sBill.TravelTypeID
+        Case TATravelTypeValues.Domestic, TATravelTypeValues.HomeVisit
+          sBill.IsDomestic = True
+        Case Else
+          For Each sTmp As SIS.TA.taBillDetails In sTmps
+            Select Case sTmp.ComponentID
+              Case TAComponentTypes.Fare, TAComponentTypes.Lodging
+                If sTmp.FK_TA_BillDetails_City1ID IsNot Nothing Then
+                  If sTmp.FK_TA_BillDetails_City1ID.RegionTypeID.ToLower = "foreign" Then
+                    sBill.IsDomestic = False
+                    Exit For
+                  End If
+                End If
+                If sTmp.FK_TA_BillDetails_City2ID IsNot Nothing Then
+                  If sTmp.FK_TA_BillDetails_City2ID.RegionTypeID.ToLower = "foreign" Then
+                    sBill.IsDomestic = False
+                    Exit For
+                  End If
+                End If
+                If sTmp.FK_TA_BillDetails_Country1ID IsNot Nothing Then
+                  If sTmp.FK_TA_BillDetails_Country1ID.RegionTypeID.ToLower = "foreign" Then
+                    sBill.IsDomestic = False
+                    Exit For
+                  End If
+                End If
+                If sTmp.FK_TA_BillDetails_Country2ID IsNot Nothing Then
+                  If sTmp.FK_TA_BillDetails_Country2ID.RegionTypeID.ToLower = "foreign" Then
+                    sBill.IsDomestic = False
+                    Exit For
+                  End If
+                End If
+            End Select
+          Next
+      End Select
+
       '1. Validate Fare Record for Travel Mode. NO Dependancy
       ValidateFare(sBill, sTmps)
       '2. Validate Lodging before DA Calculation
@@ -1959,7 +2057,7 @@ Namespace SIS.TA
         CreateDriverChargesRecord(sBill, sTmps)
       End If
       '6. Create Contingency Allowance Record for Foreign
-      If sBill.TravelTypeID <> TATravelTypeValues.Domestic AndAlso sBill.TravelTypeID <> TATravelTypeValues.HomeVisit Then
+      If sBill.TravelTypeID = TATravelTypeValues.ForeignTravel Or sBill.TravelTypeID = TATravelTypeValues.ForeignSiteVisit Then
         If Not sBill.SiteToAnotherSite Then 'This is not Partial TA Bill
           Dim IsBangladesh As Boolean = True
           Dim CountryID As String = ""
@@ -1967,7 +2065,9 @@ Namespace SIS.TA
             CountryID = sBill.FK_TA_Bills_DestinationCity.CountryID
           End If
           If Not CountryID = "Bangladesh" Then
-            AddContingencyAllowance(sBill)
+            If sBill.StartDateTime <> "" AndAlso Convert.ToDateTime(sBill.StartDateTime) <= Convert.ToDateTime("10/05/2020 23:59:59.999") Then
+              AddContingencyAllowance(sBill)
+            End If
           End If
         End If
       End If
@@ -2193,7 +2293,14 @@ Namespace SIS.TA
         'End Select
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
@@ -2222,7 +2329,6 @@ Namespace SIS.TA
       If oEmp.EMailID <> String.Empty Then
         fad = New MailAddress(oEmp.EMailID, oEmp.EmployeeName)
         oMsg.From = fad
-        'oMsg.CC.Add(fad)
       End If
       If oTA.BillStatusID = TAStates.UnderVerification Then
         oTmp = SIS.TA.taEmployees.taEmployeesGetByID(oEmp.TAVerifier)
@@ -2279,11 +2385,11 @@ Namespace SIS.TA
           Case TAStates.UnderSpecialSanction
             .AppendLine("<table style=""width:900px"" border=""1"" cellspacing=""1"" cellpadding=""1"">")
             .AppendLine("<tr><td colspan=""2""><b>Use links below, if approving from Smart Phones / Blackberry.</b></td>")
-            .AppendLine("<tr><td bgcolor=""green"" style=""text-align:center;height:30px;color:white;""><a style='color:white;' href=""http://cloud.isgec.co.in/WebTA1/taOnline.aspx?ataBillNo=" & oTA.TABillNo & """><b>Approve</b></a></td>")
-            .AppendLine("<td bgcolor=""red"" style=""text-align:center;color:white;""><a style='color:white;' href=""http://cloud.isgec.co.in/WebTA1/taOnline.aspx?rtaBillNo=" & oTA.TABillNo & """><b>Reject</b></a></td></tr>")
+            .AppendLine("<tr><td bgcolor=""green"" style=""text-align:center;height:30px;color:white;""><a style='color:white;' href=""http://136.233.23.242/YnrTA1/taOnline.aspx?ataBillNo=" & oTA.TABillNo & """><b>Approve</b></a></td>")
+            .AppendLine("<td bgcolor=""red"" style=""text-align:center;color:white;""><a style='color:white;' href=""http://136.233.23.242/YnrTA1/taOnline.aspx?rtaBillNo=" & oTA.TABillNo & """><b>Reject</b></a></td></tr>")
             .AppendLine("<tr><td colspan=""2""><b>Use links below, if approving from within office premise using office Network.</b></td>")
-            .AppendLine("<tr><td bgcolor=""green"" style=""text-align:center;height:30px;color:white;""><a style='color:white;' href=""http://192.9.200.146/WebTA1/taOnline.aspx?ataBillNo=" & oTA.TABillNo & """><b>Approve</b></a></td>")
-            .AppendLine("<td bgcolor=""red"" style=""text-align:center;color:white;""><a style='color:white;' href=""http://192.9.200.146/WebTA1/taOnline.aspx?rtaBillNo=" & oTA.TABillNo & """><b>Reject</b></a></td></tr>")
+            .AppendLine("<tr><td bgcolor=""green"" style=""text-align:center;height:30px;color:white;""><a style='color:white;' href=""http://192.168.25.194/YnrTA1/taOnline.aspx?ataBillNo=" & oTA.TABillNo & """><b>Approve</b></a></td>")
+            .AppendLine("<td bgcolor=""red"" style=""text-align:center;color:white;""><a style='color:white;' href=""http://192.168.25.194/YnrTA1/taOnline.aspx?rtaBillNo=" & oTA.TABillNo & """><b>Reject</b></a></td></tr>")
             .AppendLine("</table>")
             .AppendLine("<br/><br/>")
         End Select
@@ -2318,7 +2424,14 @@ Namespace SIS.TA
         End Select
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
@@ -2414,7 +2527,14 @@ Namespace SIS.TA
         Header = Header & sb.ToString
         Header = Header & "</body></html>"
         oMsg.Body = Header
-        oClient.Send(oMsg)
+        If Convert.ToBoolean(ConfigurationManager.AppSettings("SendMail")) Then
+          If Convert.ToBoolean(ConfigurationManager.AppSettings("Testing")) Then
+            oMsg.To.Clear()
+            oMsg.CC.Clear()
+            oMsg.To.Add(New MailAddress(ConfigurationManager.AppSettings("EMailID").ToString))
+          End If
+          oClient.Send(oMsg)
+        End If
       Catch ex As Exception
         mRet = ex.Message
       End Try
@@ -2460,6 +2580,7 @@ Namespace SIS.TA
           Case TATravelTypeValues.HomeVisit
             .Text = "HOME VISIT EXPENSE STATEMENT"
         End Select
+        If oVar.ERPYear <> "" Then .Text = .Text & " -FY: " & oVar.ERPYear
         .Style.Add("text-align", "center")
         .Font.Size = FontUnit.Point(14)
         If Not oVar.FK_TA_Bills_EmployeeID.TASelfApproval Then
@@ -2514,11 +2635,11 @@ Namespace SIS.TA
         Case 15, 17
           oColtaBH.Text = "AUTO POSTING   Finance Co.: 200  Batch No.: " & oVar.VCHBatch
         Case Else
-          oColtaBH.Text = ""
+          oColtaBH.Text = "Phone No: " & oVar.PhoneNumber
       End Select
       oColtaBH.Style.Add("text-align", "right")
       oColtaBH.ColumnSpan = "4"
-      oColtaBH.Font.Size = "14"
+      oColtaBH.Font.Size = "12"
       oColtaBH.Font.Bold = True
       oRowtaBH.Cells.Add(oColtaBH)
 
@@ -2563,7 +2684,7 @@ Namespace SIS.TA
       oColtaBH.Style.Add("text-align", "left")
       oRowtaBH.Cells.Add(oColtaBH)
       oColtaBH = New TableCell
-      oColtaBH.Text = oVar.HRM_Departments1_Description
+      oColtaBH.Text = oVar.FK_TA_Bills_CostCenterID.Description ' oVar.HRM_Departments1_Description
       oColtaBH.Style.Add("text-align", "left")
       oRowtaBH.Cells.Add(oColtaBH)
       oColtaBH = New TableCell
@@ -2713,7 +2834,7 @@ Namespace SIS.TA
       oColtaBH.Font.Bold = True
       oRowtaBH.Cells.Add(oColtaBH)
       oColtaBH = New TableCell
-      oColtaBH.Text = oVar.VerificationRemarks
+      oColtaBH.Text = oVar.ApprovalRemarks
       oColtaBH.Style.Add("text-align", "left")
       oColtaBH.ColumnSpan = "2"
       oRowtaBH.Cells.Add(oColtaBH)
@@ -2722,7 +2843,7 @@ Namespace SIS.TA
       oColtaBH.Font.Bold = True
       oRowtaBH.Cells.Add(oColtaBH)
       oColtaBH = New TableCell
-      oColtaBH.Text = oVar.ApprovalRemarks
+      oColtaBH.Text = oVar.CCRemarks
       oColtaBH.Style.Add("text-align", "left")
       oColtaBH.ColumnSpan = "2"
       oRowtaBH.Cells.Add(oColtaBH)
@@ -3591,11 +3712,11 @@ Namespace SIS.TA
               oCol.Text = otaBDLodging.AssessableValue
               oRow.Cells.Add(oCol)
               oCol = New TableCell
-              oCol.Text = "Total GST:"
+              oCol.Text = "Total GST (SGST, CGST):"
               oCol.Font.Bold = True
               oRow.Cells.Add(oCol)
               oCol = New TableCell
-              oCol.Text = otaBDLodging.TotalGST
+              oCol.Text = otaBDLodging.TotalGST & " (" & otaBDLodging.SGSTAmount & ", " & otaBDLodging.CGSTAmount & ")"
               oRow.Cells.Add(oCol)
               oCol = New TableCell
               oCol.Text = "Total Amount:"

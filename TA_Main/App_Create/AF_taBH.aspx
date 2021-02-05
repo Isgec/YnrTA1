@@ -70,11 +70,6 @@
                   <b><asp:Label ID="Label3" ForeColor="green" runat="server" Text="If * marked in above is NOT Defined, Pl. get it defined in system first." /></b>
                 </td>
               </tr>
-              <tr>
-                <td colspan="2" class="alignCenter">
-                  <b><asp:LinkButton ID="cmdRequest" ForeColor="black" runat="server" Text="Click here to send E-Mail to JoomlaSupport." OnClientClick="return confirm('Do you want to send E-Mail ?');" OnClick="cmdRequest_Click" /></b>
-                </td>
-              </tr>
             </table>
           </div>
           </td>
@@ -197,7 +192,7 @@
         <td class="alignright">
           <asp:Label ID="L_DestinationName" runat="server" Text="Enter Destination [If NOT Found in List] :" />
         </td>
-        <td colspan="3">
+        <td>
           <asp:TextBox ID="F_DestinationName"
             Text='<%# Bind("DestinationName") %>'
             CssClass = "mytxt"
@@ -207,6 +202,21 @@
             ToolTip="Enter value for Destination Name."
             MaxLength="50"
             Width="350px"
+            runat="server" />
+        </td>
+        <td class="alignright">
+          <asp:Label ID="Label10" runat="server" Font-Bold="true" Text="Phone Number :" />
+        </td>
+        <td>
+          <asp:TextBox ID="F_PhoneNumber"
+            Text='<%# Bind("PhoneNumber") %>'
+            CssClass = "mytxt"
+            onfocus = "return this.select();"
+            ValidationGroup="taBH"
+            onblur= "this.value=this.value.replace(/\'/g,'');"
+            ToolTip="Enter Your Phone Number."
+            MaxLength="20"
+            Width="200px"
             runat="server" />
         </td>
         </tr>
@@ -510,7 +520,6 @@
           </td>
         </tr>
       </table>
-
     </div>
   </InsertItemTemplate>
 </asp:FormView>

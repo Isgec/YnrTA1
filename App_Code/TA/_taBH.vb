@@ -136,6 +136,8 @@ Namespace SIS.TA
     Public Property VCHBatch As String = ""
     Public Property VCHDocument As String = ""
     Public Property VCHLine As String = ""
+    Public Property ERPYear As String = ""
+    Public Property PhoneNumber As String = ""
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -1868,6 +1870,7 @@ Namespace SIS.TA
         .PrjCalcType = 2
         .Contractual = Record.Contractual
         .DesignationID = Record.DesignationID
+        .PhoneNumber = Record.PhoneNumber
       End With
       Return SIS.TA.taBH.InsertData(_Rec)
     End Function
@@ -1958,6 +1961,8 @@ Namespace SIS.TA
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHBatch", SqlDbType.NVarChar, 51, IIf(Record.VCHBatch = "", Convert.DBNull, Record.VCHBatch))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHDocument", SqlDbType.NVarChar, 51, IIf(Record.VCHDocument = "", Convert.DBNull, Record.VCHDocument))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHLine", SqlDbType.NVarChar, 51, IIf(Record.VCHLine = "", Convert.DBNull, Record.VCHLine))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPYear", SqlDbType.NVarChar, 51, IIf(Record.ERPYear = "", Convert.DBNull, Record.ERPYear))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PhoneNumber", SqlDbType.NVarChar, 21, IIf(Record.PhoneNumber = "", Convert.DBNull, Record.PhoneNumber))
           Cmd.Parameters.Add("@Return_TABillNo", SqlDbType.Int, 11)
           Cmd.Parameters("@Return_TABillNo").Direction = ParameterDirection.Output
           Con.Open()
@@ -1997,6 +2002,7 @@ Namespace SIS.TA
         .CostCenterID = Record.CostCenterID
         .BillStatusID = Record.BillStatusID
         .PrjCalcType = Record.PrjCalcType
+        .PhoneNumber = Record.PhoneNumber
       End With
       Return SIS.TA.taBH.UpdateData(_Rec)
     End Function
@@ -2088,6 +2094,8 @@ Namespace SIS.TA
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHBatch", SqlDbType.NVarChar, 51, IIf(Record.VCHBatch = "", Convert.DBNull, Record.VCHBatch))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHDocument", SqlDbType.NVarChar, 51, IIf(Record.VCHDocument = "", Convert.DBNull, Record.VCHDocument))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@VCHLine", SqlDbType.NVarChar, 51, IIf(Record.VCHLine = "", Convert.DBNull, Record.VCHLine))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ERPYear", SqlDbType.NVarChar, 51, IIf(Record.ERPYear = "", Convert.DBNull, Record.ERPYear))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@PhoneNumber", SqlDbType.NVarChar, 21, IIf(Record.PhoneNumber = "", Convert.DBNull, Record.PhoneNumber))
           Cmd.Parameters.Add("@RowCount", SqlDbType.Int)
           Cmd.Parameters("@RowCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -2145,37 +2153,7 @@ Namespace SIS.TA
       Return Results.ToArray
     End Function
     Public Sub New(ByVal Reader As SqlDataReader)
-      Try
-        For Each pi As System.Reflection.PropertyInfo In Me.GetType.GetProperties
-          If pi.MemberType = Reflection.MemberTypes.Property Then
-            Try
-              Dim Found As Boolean = False
-              For I As Integer = 0 To Reader.FieldCount - 1
-                If Reader.GetName(I).ToLower = pi.Name.ToLower Then
-                  Found = True
-                  Exit For
-                End If
-              Next
-              If Found Then
-                If Convert.IsDBNull(Reader(pi.Name)) Then
-                  Select Case Reader.GetDataTypeName(Reader.GetOrdinal(pi.Name))
-                    Case "decimal"
-                      CallByName(Me, pi.Name, CallType.Let, "0.00")
-                    Case "bit"
-                      CallByName(Me, pi.Name, CallType.Let, Boolean.FalseString)
-                    Case Else
-                      CallByName(Me, pi.Name, CallType.Let, String.Empty)
-                  End Select
-                Else
-                  CallByName(Me, pi.Name, CallType.Let, Reader(pi.Name))
-                End If
-              End If
-            Catch ex As Exception
-            End Try
-          End If
-        Next
-      Catch ex As Exception
-      End Try
+      SIS.SYS.SQLDatabase.DBCommon.NewObj(Me, Reader)
     End Sub
     Public Sub New()
     End Sub

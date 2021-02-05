@@ -9,29 +9,31 @@ Namespace SIS.TA
     Private Shared _RecordCount As Integer
     Private _CardNo As String = ""
     Private _EmployeeName As String = ""
-    Private _C_CompanyID As String = ""
-    Private _C_DivisionID As String = ""
+    Private _C_OfficeID As String = ""
     Private _C_DepartmentID As String = ""
     Private _C_DesignationID As String = ""
-    Private _C_OfficeID As String = ""
+    Private _C_CompanyID As String = ""
+    Private _C_DivisionID As String = ""
     Private _ActiveState As Boolean = False
-    Private _TASelfApproval As Boolean = False
+    Private _Contractual As Boolean = False
+    Private _EMailID As String = ""
+    Private _CategoryID As String = ""
+    Private _NonTechnical As Boolean = False
     Private _TAVerifier As String = ""
     Private _TAApprover As String = ""
     Private _TASanctioningAuthority As String = ""
-    Private _CategoryID As String = ""
-    Private _EMailID As String = ""
-    Private _Contractual As Boolean = False
-    Private _NonTechnical As Boolean = False
+    Private _SiteAllowanceApprover As String = ""
+    Private _TASelfApproval As Boolean = False
     Private _HRM_Companies4_Description As String = ""
     Private _HRM_Departments2_Description As String = ""
     Private _HRM_Designations3_Description As String = ""
     Private _HRM_Divisions5_Description As String = ""
     Private _HRM_Offices1_Description As String = ""
+    Private _HRM_Employees6_EmployeeName As String = ""
+    Private _HRM_Employees7_EmployeeName As String = ""
     Private _TA_Categories8_cmba As String = ""
-    Private _HRM_Employees18_EmployeeName As String = ""
-    Private _HRM_Employees19_EmployeeName As String = ""
-    Private _HRM_Employees20_EmployeeName As String = ""
+    Private _HRM_Employees9_EmployeeName As String = ""
+    Private _HRM_Employees10_EmployeeName As String = ""
     Private _FK_HRM_Employees_HRM_Companies As SIS.QCM.qcmCompanies = Nothing
     Private _FK_HRM_Employees_HRM_Departments As SIS.TA.taDepartments = Nothing
     Private _FK_HRM_Employees_HRM_Designations As SIS.QCM.qcmDesignations = Nothing
@@ -41,6 +43,7 @@ Namespace SIS.TA
     Private _FK_HRM_Employees_TAVerifier As SIS.TA.taEmployees = Nothing
     Private _FK_HRM_Employees_TAApprover As SIS.TA.taEmployees = Nothing
     Private _FK_HRM_Employees_TASanctioningAuthority As SIS.TA.taEmployees = Nothing
+    Private _FK_HRM_Employees_SiteAllowanceApprover As SIS.TA.taEmployees = Nothing
     Public ReadOnly Property ForeColor() As System.Drawing.Color
       Get
         Dim mRet As System.Drawing.Color = Drawing.Color.Blue
@@ -87,28 +90,16 @@ Namespace SIS.TA
         _EmployeeName = value
       End Set
     End Property
-    Public Property C_CompanyID() As String
+    Public Property C_OfficeID() As String
       Get
-        Return _C_CompanyID
+        Return _C_OfficeID
       End Get
       Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _C_CompanyID = ""
-         Else
-           _C_CompanyID = value
-         End If
-      End Set
-    End Property
-    Public Property C_DivisionID() As String
-      Get
-        Return _C_DivisionID
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _C_DivisionID = ""
-         Else
-           _C_DivisionID = value
-         End If
+        If Convert.IsDBNull(value) Then
+          _C_OfficeID = ""
+        Else
+          _C_OfficeID = value
+        End If
       End Set
     End Property
     Public Property C_DepartmentID() As String
@@ -116,11 +107,11 @@ Namespace SIS.TA
         Return _C_DepartmentID
       End Get
       Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _C_DepartmentID = ""
-         Else
-           _C_DepartmentID = value
-         End If
+        If Convert.IsDBNull(value) Then
+          _C_DepartmentID = ""
+        Else
+          _C_DepartmentID = value
+        End If
       End Set
     End Property
     Public Property C_DesignationID() As String
@@ -128,23 +119,35 @@ Namespace SIS.TA
         Return _C_DesignationID
       End Get
       Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _C_DesignationID = ""
-         Else
-           _C_DesignationID = value
-         End If
+        If Convert.IsDBNull(value) Then
+          _C_DesignationID = ""
+        Else
+          _C_DesignationID = value
+        End If
       End Set
     End Property
-    Public Property C_OfficeID() As String
+    Public Property C_CompanyID() As String
       Get
-        Return _C_OfficeID
+        Return _C_CompanyID
       End Get
       Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _C_OfficeID = ""
-         Else
-           _C_OfficeID = value
-         End If
+        If Convert.IsDBNull(value) Then
+          _C_CompanyID = ""
+        Else
+          _C_CompanyID = value
+        End If
+      End Set
+    End Property
+    Public Property C_DivisionID() As String
+      Get
+        Return _C_DivisionID
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _C_DivisionID = ""
+        Else
+          _C_DivisionID = value
+        End If
       End Set
     End Property
     Public Property ActiveState() As Boolean
@@ -155,74 +158,6 @@ Namespace SIS.TA
         _ActiveState = value
       End Set
     End Property
-    Public Property TASelfApproval() As Boolean
-      Get
-        Return _TASelfApproval
-      End Get
-      Set(ByVal value As Boolean)
-        _TASelfApproval = value
-      End Set
-    End Property
-    Public Property TAVerifier() As String
-      Get
-        Return _TAVerifier
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _TAVerifier = ""
-         Else
-           _TAVerifier = value
-         End If
-      End Set
-    End Property
-    Public Property TAApprover() As String
-      Get
-        Return _TAApprover
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _TAApprover = ""
-         Else
-           _TAApprover = value
-         End If
-      End Set
-    End Property
-    Public Property TASanctioningAuthority() As String
-      Get
-        Return _TASanctioningAuthority
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _TASanctioningAuthority = ""
-         Else
-           _TASanctioningAuthority = value
-         End If
-      End Set
-    End Property
-    Public Property CategoryID() As String
-      Get
-        Return _CategoryID
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _CategoryID = ""
-         Else
-           _CategoryID = value
-         End If
-      End Set
-    End Property
-    Public Property EMailID() As String
-      Get
-        Return _EMailID
-      End Get
-      Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _EMailID = ""
-         Else
-           _EMailID = value
-         End If
-      End Set
-    End Property
     Public Property Contractual() As Boolean
       Get
         Return _Contractual
@@ -231,12 +166,92 @@ Namespace SIS.TA
         _Contractual = value
       End Set
     End Property
+    Public Property EMailID() As String
+      Get
+        Return _EMailID
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _EMailID = ""
+        Else
+          _EMailID = value
+        End If
+      End Set
+    End Property
+    Public Property CategoryID() As String
+      Get
+        Return _CategoryID
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _CategoryID = ""
+        Else
+          _CategoryID = value
+        End If
+      End Set
+    End Property
     Public Property NonTechnical() As Boolean
       Get
         Return _NonTechnical
       End Get
       Set(ByVal value As Boolean)
         _NonTechnical = value
+      End Set
+    End Property
+    Public Property TAVerifier() As String
+      Get
+        Return _TAVerifier
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _TAVerifier = ""
+        Else
+          _TAVerifier = value
+        End If
+      End Set
+    End Property
+    Public Property TAApprover() As String
+      Get
+        Return _TAApprover
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _TAApprover = ""
+        Else
+          _TAApprover = value
+        End If
+      End Set
+    End Property
+    Public Property TASanctioningAuthority() As String
+      Get
+        Return _TASanctioningAuthority
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _TASanctioningAuthority = ""
+        Else
+          _TASanctioningAuthority = value
+        End If
+      End Set
+    End Property
+    Public Property TASelfApproval() As Boolean
+      Get
+        Return _TASelfApproval
+      End Get
+      Set(ByVal value As Boolean)
+        _TASelfApproval = value
+      End Set
+    End Property
+    Public Property SiteAllowanceApprover() As String
+      Get
+        Return _SiteAllowanceApprover
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _SiteAllowanceApprover = ""
+        Else
+          _SiteAllowanceApprover = value
+        End If
       End Set
     End Property
     Public Property HRM_Companies4_Description() As String
@@ -284,43 +299,67 @@ Namespace SIS.TA
         Return _TA_Categories8_cmba
       End Get
       Set(ByVal value As String)
-         If Convert.IsDBNull(Value) Then
-           _TA_Categories8_cmba = ""
-         Else
-           _TA_Categories8_cmba = value
-         End If
+        If Convert.IsDBNull(value) Then
+          _TA_Categories8_cmba = ""
+        Else
+          _TA_Categories8_cmba = value
+        End If
       End Set
     End Property
-    Public Property HRM_Employees18_EmployeeName() As String
+    Public Property HRM_Employees6_EmployeeName() As String
       Get
-        Return _HRM_Employees18_EmployeeName
+        Return _HRM_Employees6_EmployeeName
       End Get
       Set(ByVal value As String)
-        _HRM_Employees18_EmployeeName = value
+        If Convert.IsDBNull(value) Then
+          _HRM_Employees6_EmployeeName = ""
+        Else
+          _HRM_Employees6_EmployeeName = value
+        End If
       End Set
     End Property
-    Public Property HRM_Employees19_EmployeeName() As String
+    Public Property HRM_Employees7_EmployeeName() As String
       Get
-        Return _HRM_Employees19_EmployeeName
+        Return _HRM_Employees7_EmployeeName
       End Get
       Set(ByVal value As String)
-        _HRM_Employees19_EmployeeName = value
+        If Convert.IsDBNull(value) Then
+          _HRM_Employees7_EmployeeName = ""
+        Else
+          _HRM_Employees7_EmployeeName = value
+        End If
       End Set
     End Property
-    Public Property HRM_Employees20_EmployeeName() As String
+    Public Property HRM_Employees9_EmployeeName() As String
       Get
-        Return _HRM_Employees20_EmployeeName
+        Return _HRM_Employees9_EmployeeName
       End Get
       Set(ByVal value As String)
-        _HRM_Employees20_EmployeeName = value
+        If Convert.IsDBNull(value) Then
+          _HRM_Employees9_EmployeeName = ""
+        Else
+          _HRM_Employees9_EmployeeName = value
+        End If
       End Set
     End Property
-    Public Readonly Property DisplayField() As String
+    Public Property HRM_Employees10_EmployeeName() As String
+      Get
+        Return _HRM_Employees10_EmployeeName
+      End Get
+      Set(ByVal value As String)
+        If Convert.IsDBNull(value) Then
+          _HRM_Employees10_EmployeeName = ""
+        Else
+          _HRM_Employees10_EmployeeName = value
+        End If
+      End Set
+    End Property
+    Public ReadOnly Property DisplayField() As String
       Get
         Return "" & _EmployeeName.ToString.PadRight(50, " ")
       End Get
     End Property
-    Public Readonly Property PrimaryKey() As String
+    Public ReadOnly Property PrimaryKey() As String
       Get
         Return _CardNo
       End Get
@@ -395,36 +434,45 @@ Namespace SIS.TA
     Public ReadOnly Property FK_HRM_Employees_TAVerifier() As SIS.TA.taEmployees
       Get
         If _FK_HRM_Employees_TAVerifier Is Nothing Then
-          _FK_HRM_Employees_TAVerifier = SIS.TA.taEmployees.taEmployeesGetByID(_TAVerifier)
+          _FK_HRM_Employees_TAVerifier = SIS.TA.taEmployees.taEmployeesGetByID(TAVerifier)
         End If
         Return _FK_HRM_Employees_TAVerifier
-      End Get
-    End Property
-    Public ReadOnly Property FK_HRM_Employees_TAApprover() As SIS.TA.taEmployees
-      Get
-        If _FK_HRM_Employees_TAApprover Is Nothing Then
-          _FK_HRM_Employees_TAApprover = SIS.TA.taEmployees.taEmployeesGetByID(_TAApprover)
-        End If
-        Return _FK_HRM_Employees_TAApprover
       End Get
     End Property
     Public ReadOnly Property FK_HRM_Employees_TASanctioningAuthority() As SIS.TA.taEmployees
       Get
         If _FK_HRM_Employees_TASanctioningAuthority Is Nothing Then
-          _FK_HRM_Employees_TASanctioningAuthority = SIS.TA.taEmployees.taEmployeesGetByID(_TASanctioningAuthority)
+          _FK_HRM_Employees_TASanctioningAuthority = SIS.TA.taEmployees.taEmployeesGetByID(TASanctioningAuthority)
         End If
         Return _FK_HRM_Employees_TASanctioningAuthority
       End Get
     End Property
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    Public ReadOnly Property FK_HRM_Employees_TAApprover() As SIS.TA.taEmployees
+      Get
+        If _FK_HRM_Employees_TAApprover Is Nothing Then
+          _FK_HRM_Employees_TAApprover = SIS.TA.taEmployees.taEmployeesGetByID(TAApprover)
+        End If
+        Return _FK_HRM_Employees_TAApprover
+      End Get
+    End Property
+    Public ReadOnly Property FK_HRM_Employees_SiteAllowanceApprover() As SIS.TA.taEmployees
+      Get
+        If _FK_HRM_Employees_SiteAllowanceApprover Is Nothing Then
+          _FK_HRM_Employees_SiteAllowanceApprover = SIS.TA.taEmployees.taEmployeesGetByID(SiteAllowanceApprover)
+        End If
+        Return _FK_HRM_Employees_SiteAllowanceApprover
+      End Get
+    End Property
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function taEmployeesSelectList(ByVal OrderBy As String) As List(Of SIS.TA.taEmployees)
       Dim Results As List(Of SIS.TA.taEmployees) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "sptaEmployeesSelectList"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState", SqlDbType.Bit, 2, 1)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -440,19 +488,19 @@ Namespace SIS.TA
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function taEmployeesGetNewRecord() As SIS.TA.taEmployees
       Return New SIS.TA.taEmployees()
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
+    <DataObjectMethod(DataObjectMethodType.Select)>
     Public Shared Function taEmployeesGetByID(ByVal CardNo As String) As SIS.TA.taEmployees
       Dim Results As SIS.TA.taEmployees = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
           Cmd.CommandText = "sptaEmployeesSelectByID"
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo",SqlDbType.NVarChar,CardNo.ToString.Length, CardNo)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@CardNo", SqlDbType.NVarChar, CardNo.ToString.Length, CardNo)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           Con.Open()
           Dim Reader As SqlDataReader = Cmd.ExecuteReader()
           If Reader.Read() Then
@@ -463,8 +511,8 @@ Namespace SIS.TA
       End Using
       Return Results
     End Function
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function taEmployeesSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal C_CompanyID As String, ByVal C_DivisionID As String, ByVal C_DepartmentID As String, ByVal C_DesignationID As Int32, ByVal C_OfficeID As Int32, ByVal CategoryID As Int32) As List(Of SIS.TA.taEmployees)
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function taEmployeesSelectList(ByVal StartRowIndex As Integer, ByVal MaximumRows As Integer, ByVal OrderBy As String, ByVal SearchState As Boolean, ByVal SearchText As String, ByVal C_OfficeID As Int32, ByVal C_DepartmentID As String, ByVal C_DesignationID As Int32, ByVal C_CompanyID As String, ByVal C_DivisionID As String, ByVal CategoryID As Int32) As List(Of SIS.TA.taEmployees)
       Dim Results As List(Of SIS.TA.taEmployees) = Nothing
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
@@ -474,17 +522,18 @@ Namespace SIS.TA
             SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@KeyWord", SqlDbType.NVarChar, 250, SearchText)
           Else
             Cmd.CommandText = "sptaEmployeesSelectListFilteres"
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_CompanyID",SqlDbType.NVarChar,6, IIf(C_CompanyID Is Nothing, String.Empty,C_CompanyID))
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DivisionID",SqlDbType.NVarChar,6, IIf(C_DivisionID Is Nothing, String.Empty,C_DivisionID))
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DepartmentID",SqlDbType.NVarChar,6, IIf(C_DepartmentID Is Nothing, String.Empty,C_DepartmentID))
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DesignationID",SqlDbType.Int,10, IIf(C_DesignationID = Nothing, 0,C_DesignationID))
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_OfficeID",SqlDbType.Int,10, IIf(C_OfficeID = Nothing, 0,C_OfficeID))
-            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_CategoryID",SqlDbType.Int,10, IIf(CategoryID = Nothing, 0,CategoryID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_OfficeID", SqlDbType.Int, 10, IIf(C_OfficeID = Nothing, 0, C_OfficeID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DepartmentID", SqlDbType.NVarChar, 6, IIf(C_DepartmentID Is Nothing, String.Empty, C_DepartmentID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DesignationID", SqlDbType.Int, 10, IIf(C_DesignationID = Nothing, 0, C_DesignationID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_CompanyID", SqlDbType.NVarChar, 6, IIf(C_CompanyID Is Nothing, String.Empty, C_CompanyID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_C_DivisionID", SqlDbType.NVarChar, 6, IIf(C_DivisionID Is Nothing, String.Empty, C_DivisionID))
+            SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@Filter_CategoryID", SqlDbType.Int, 10, IIf(CategoryID = Nothing, 0, CategoryID))
           End If
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@StartRowIndex", SqlDbType.Int, -1, StartRowIndex)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@MaximumRows", SqlDbType.Int, -1, MaximumRows)
-          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NvarChar, 9, HttpContext.Current.Session("LoginID"))
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@LoginID", SqlDbType.NVarChar, 9, HttpContext.Current.Session("LoginID"))
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@OrderBy", SqlDbType.NVarChar, 50, OrderBy)
+          'SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@ActiveState", SqlDbType.Bit, 2, 1)
           Cmd.Parameters.Add("@RecordCount", SqlDbType.Int)
           Cmd.Parameters("@RecordCount").Direction = ParameterDirection.Output
           _RecordCount = -1
@@ -500,12 +549,12 @@ Namespace SIS.TA
       End Using
       Return Results
     End Function
-    Public Shared Function taEmployeesSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal C_CompanyID As String, ByVal C_DivisionID As String, ByVal C_DepartmentID As String, ByVal C_DesignationID As Int32, ByVal C_OfficeID As Int32, ByVal CategoryID As Int32) As Integer
+    Public Shared Function taEmployeesSelectCount(ByVal SearchState As Boolean, ByVal SearchText As String, ByVal C_OfficeID As Int32, ByVal C_DepartmentID As String, ByVal C_DesignationID As Int32, ByVal C_CompanyID As String, ByVal C_DivisionID As String, ByVal CategoryID As Int32) As Integer
       Return _RecordCount
     End Function
-      'Select By ID One Record Filtered Overloaded GetByID
-    <DataObjectMethod(DataObjectMethodType.Select)> _
-    Public Shared Function taEmployeesGetByID(ByVal CardNo As String, ByVal Filter_C_CompanyID As String, ByVal Filter_C_DivisionID As String, ByVal Filter_C_DepartmentID As String, ByVal Filter_C_DesignationID As Int32, ByVal Filter_C_OfficeID As Int32, ByVal Filter_CategoryID As Int32) As SIS.TA.taEmployees
+    'Select By ID One Record Filtered Overloaded GetByID
+    <DataObjectMethod(DataObjectMethodType.Select)>
+    Public Shared Function taEmployeesGetByID(ByVal CardNo As String, ByVal Filter_C_OfficeID As Int32, ByVal Filter_C_DepartmentID As String, ByVal Filter_C_DesignationID As Int32, ByVal Filter_C_CompanyID As String, ByVal Filter_C_DivisionID As String, ByVal Filter_CategoryID As Int32) As SIS.TA.taEmployees
       Return taEmployeesGetByID(CardNo)
     End Function
     <DataObjectMethod(DataObjectMethodType.Insert, True)> _

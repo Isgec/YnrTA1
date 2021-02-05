@@ -79,7 +79,7 @@
             Runat="Server" />
           <asp:Label
             ID = "Label2"
-            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees18_EmployeeName") %>'
+            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees6_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
         </td>
@@ -96,7 +96,7 @@
             Runat="Server" />
           <asp:Label
             ID = "Label4"
-            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees19_EmployeeName") %>'
+            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees7_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
         </td>
@@ -115,7 +115,7 @@
             Runat="Server" />
           <asp:Label
             ID = "Label6"
-            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees20_EmployeeName") %>'
+            Text='<%# Eval("FK_TA_Bills_EmployeeID.HRM_Employees9_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
         </td>
@@ -717,23 +717,29 @@
                     <td>
                     </td>
                     <td colspan="2">
-                    <script type="text/javascript">
-                      var pcnt = 0;
-                      function show_attach(o) {
-                        pcnt = pcnt + 1;
-                        var nam = 'wTask' + pcnt;
-                        var url = o.getAttribute('CommandValue');
-                        window.open(url, nam, 'left=20,top=20,width=1100,height=600,toolbar=1,resizable=1,scrollbars=1');
-                        return false;
-                      }
-                    </script>
-                     <asp:Button ID="cmdAttach" runat="server" CommandValue='<%# Eval("GetAttachLink") %>' Text="Attach MD Approval" OnClientClick="return show_attach(this);" />
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
           </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="alignright">
+          <asp:Label ID="Label10" runat="server" Font-Bold="true" Text="Phone Number :" />
+        </td>
+        <td colspan="3">
+          <asp:TextBox ID="F_PhoneNumber"
+            Text='<%# Bind("PhoneNumber") %>'
+            CssClass = "mytxt"
+            onfocus = "return this.select();"
+            ValidationGroup="taBH"
+            onblur= "this.value=this.value.replace(/\'/g,'');"
+            ToolTip="Enter Your Phone Number."
+            MaxLength="20"
+            Width="200px"
+            runat="server" />
         </td>
       </tr>
       <tr id="opt5" runat="server" clientidmode="static"><td colspan="4"  style="border-top: solid 1pt LightGrey; font-weight:bold;text-align:center;background-color:lavender" >SPECIAL SANCTION OTHER THAN ENTITLEMENT</td></tr>
@@ -1225,7 +1231,7 @@
             <asp:Label ID="LabelSystemText" runat="server" ForeColor='<%# Eval("ForeColor") %>' Text='<%# Bind("SystemText") %>'></asp:Label>
           </ItemTemplate>
           <ItemStyle CssClass="" />
-        <HeaderStyle CssClass="" Width="100px" />
+        <HeaderStyle CssClass="" Width="300px" />
         </asp:TemplateField>
         <asp:TemplateField HeaderText="Claimed Amount" SortExpression="AmountTotal">
           <ItemTemplate>

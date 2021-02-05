@@ -196,9 +196,9 @@
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>
-        <asp:TemplateField HeaderText="Approver" SortExpression="HRM_Employees19_EmployeeName">
+        <asp:TemplateField HeaderText="Approver" SortExpression="HRM_Employees7_EmployeeName">
           <ItemTemplate>
-             <asp:Label ID="L_TAApprover" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("TAApprover") %>' Text='<%# Eval("HRM_Employees19_EmployeeName") %>'></asp:Label>
+             <asp:Label ID="L_TAApprover" runat="server" ForeColor='<%# Eval("ForeColor") %>' Title='<%# EVal("TAApprover") %>' Text='<%# Eval("HRM_Employees7_EmployeeName") %>'></asp:Label>
           </ItemTemplate>
           <HeaderStyle Width="100px" />
         </asp:TemplateField>

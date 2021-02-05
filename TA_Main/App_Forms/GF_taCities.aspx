@@ -138,7 +138,7 @@
         <asp:TemplateField HeaderText="EDIT">
           <ItemTemplate>
             <asp:ImageButton ID="cmdEditPage" ValidationGroup="Edit" runat="server" Visible='<%# EVal("Visible") %>' Enabled='<%# EVal("Enable") %>' AlternateText="Edit" ToolTip="Edit the record." SkinID="Edit" CommandName="lgEdit" CommandArgument='<%# Container.DataItemIndex %>' />
-            <asp:Button ID="cmdedit" runat="server" CommandName="edit" Text="Edit" CommandArgument='<%# Container.DataItemIndex %>' />
+<%--            <asp:Button ID="cmdedit" runat="server" CommandName="edit" Text="Edit" CommandArgument='<%# Container.DataItemIndex %>' />--%>
           </ItemTemplate>
           <EditItemTemplate></EditItemTemplate>
           <ItemStyle CssClass="alignCenter" />

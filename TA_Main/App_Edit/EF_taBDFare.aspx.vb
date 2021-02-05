@@ -1,3 +1,4 @@
+Imports System.Web.Script.Serialization
 Partial Class EF_taBDFare
   Inherits SIS.SYS.UpdateBase
   Public Property Editable() As Boolean
@@ -76,57 +77,57 @@ Partial Class EF_taBDFare
 
     End Try
   End Sub
-  <System.Web.Services.WebMethod()> _
-  <System.Web.Script.Services.ScriptMethod()> _
+  <System.Web.Services.WebMethod()>
+  <System.Web.Script.Services.ScriptMethod()>
   Public Shared Function City1IDCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
     Return SIS.TA.taCities.SelecttaCitiesAutoCompleteList(prefixText, count, contextKey)
   End Function
-  <System.Web.Services.WebMethod()> _
-  <System.Web.Script.Services.ScriptMethod()> _
+  <System.Web.Services.WebMethod()>
+  <System.Web.Script.Services.ScriptMethod()>
   Public Shared Function City2IDCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
     Return SIS.TA.taCities.SelecttaCitiesAutoCompleteList(prefixText, count, contextKey)
   End Function
-  <System.Web.Services.WebMethod()> _
-  <System.Web.Script.Services.ScriptMethod()> _
+  <System.Web.Services.WebMethod()>
+  <System.Web.Script.Services.ScriptMethod()>
   Public Shared Function ProjectIDCompletionList(ByVal prefixText As String, ByVal count As Integer, ByVal contextKey As String) As String()
     Return SIS.QCM.qcmProjects.SelectqcmProjectsAutoCompleteList(prefixText, count, contextKey)
   End Function
-  <System.Web.Services.WebMethod()> _
+  <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_TA_BillDetails_ProjectID(ByVal value As String) As String
     Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String="0|" & aVal(0)
-    Dim ProjectID As String = CType(aVal(1),String)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim ProjectID As String = CType(aVal(1), String)
     Dim oVar As SIS.QCM.qcmProjects = SIS.QCM.qcmProjects.qcmProjectsGetByID(ProjectID)
     If oVar Is Nothing Then
-      mRet = "1|" & aVal(0) & "|Record not found." 
+      mRet = "1|" & aVal(0) & "|Record not found."
     Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
     End If
     Return mRet
   End Function
-  <System.Web.Services.WebMethod()> _
+  <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_TA_BillDetails_City1ID(ByVal value As String) As String
     Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String="0|" & aVal(0)
-    Dim City1ID As String = CType(aVal(1),String)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim City1ID As String = CType(aVal(1), String)
     Dim oVar As SIS.TA.taCities = SIS.TA.taCities.taCitiesGetByID(City1ID)
     If oVar Is Nothing Then
-      mRet = "1|" & aVal(0) & "|Record not found." 
+      mRet = "1|" & aVal(0) & "|Record not found."
     Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
     End If
     Return mRet
   End Function
-  <System.Web.Services.WebMethod()> _
+  <System.Web.Services.WebMethod()>
   Public Shared Function validate_FK_TA_BillDetails_City2ID(ByVal value As String) As String
     Dim aVal() As String = value.Split(",".ToCharArray)
-    Dim mRet As String="0|" & aVal(0)
-    Dim City2ID As String = CType(aVal(1),String)
+    Dim mRet As String = "0|" & aVal(0)
+    Dim City2ID As String = CType(aVal(1), String)
     Dim oVar As SIS.TA.taCities = SIS.TA.taCities.taCitiesGetByID(City2ID)
     If oVar Is Nothing Then
-      mRet = "1|" & aVal(0) & "|Record not found." 
+      mRet = "1|" & aVal(0) & "|Record not found."
     Else
-      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField 
+      mRet = "0|" & aVal(0) & "|" & oVar.DisplayField
     End If
     Return mRet
   End Function
@@ -167,4 +168,13 @@ Partial Class EF_taBDFare
     Return SIS.TA.taCountries.SelecttaCountriesAutoCompleteList(prefixText, count, contextKey)
   End Function
 
+  Private Sub FVtaBDFare_ItemUpdating(sender As Object, e As FormViewUpdateEventArgs) Handles FVtaBDFare.ItemUpdating
+    Try
+      SIS.TA.taBDFare.ValidateFare(New SIS.TA.taBDFare(e.NewValues))
+    Catch ex As Exception
+      ScriptManager.RegisterClientScriptBlock(Page, Page.GetType(), "", String.Format("alert({0});", New JavaScriptSerializer().Serialize(ex.Message)), True)
+      e.Cancel = True
+    End Try
+
+  End Sub
 End Class

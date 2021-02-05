@@ -224,6 +224,28 @@
             Runat="Server" />
           </td>
       </tr>
+      <tr>
+        <td class="alignright">
+          <asp:Label ID="L_ShowInFare" runat="server" Text="Show in FARE Entry :" />&nbsp;
+        </td>
+        <td>
+          <asp:CheckBox ID="F_ShowInFare"
+            Checked='<%# Bind("ShowInFare") %>'
+            CssClass = "mychk"
+            ClientIDMode="Static"
+            runat="server" />
+        </td>
+        <td class="alignright">
+          <asp:Label ID="L_ShowInLC" runat="server" Text="Show in Local Conveyance :" />&nbsp;
+        </td>
+        <td>
+          <asp:CheckBox ID="F_ShowInLC"
+            Checked='<%# Bind("ShowInLC") %>'
+            CssClass = "mychk"
+            ClientIDMode="Static"
+            runat="server" />
+        </td>
+      </tr>
     </table>
     </div>
   </InsertItemTemplate>

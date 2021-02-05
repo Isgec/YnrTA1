@@ -40,6 +40,7 @@ Public Enum TATravelTypeValues
   ForeignTravel = 2
   ForeignSiteVisit = 3
   HomeVisit = 4
+  LocalTravel = 5
 End Enum
 Public Enum TACalculationTypes
   ConvertAtGrossLevel = 1

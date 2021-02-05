@@ -122,6 +122,7 @@ Namespace SIS.TA
     End Function
     Public Shared Function ValidateTmp(ByVal tmp As SIS.TA.taBDLodging) As Boolean
       Dim mRet As Boolean = True
+      If tmp.FK_TA_BillDetails_TABillNo.TravelTypeID = TATravelTypeValues.LocalTravel Then Return True
       Dim ci As System.Globalization.CultureInfo = SIS.SYS.Utilities.SessionManager.ci
       If Convert.ToDateTime(tmp.Date1Time, ci) > Convert.ToDateTime(tmp.Date2Time, ci) Then
         Throw New Exception("Lodging End Date-Time CAN NOT be less than Start Date-Time")
@@ -221,5 +222,38 @@ Namespace SIS.TA
       End Try
       Return tmp
     End Function
+    Public Sub New(v As IOrderedDictionary)
+      Try
+        For Each pi As System.Reflection.PropertyInfo In Me.GetType.GetProperties
+          If pi.MemberType = Reflection.MemberTypes.Property Then
+            Try
+              Dim Found As Boolean = False
+              For I As Integer = 0 To v.Count - 1
+                If v.Keys(I).ToLower = pi.Name.ToLower Then
+                  Found = True
+                  Exit For
+                End If
+              Next
+              If Found Then
+                If Convert.IsDBNull(v.Item(pi.Name)) Then
+                  Select Case Type.GetTypeCode(pi.PropertyType)
+                    Case TypeCode.Decimal, TypeCode.Double
+                      CallByName(Me, pi.Name, CallType.Let, "0.00")
+                    Case TypeCode.Boolean
+                      CallByName(Me, pi.Name, CallType.Let, Boolean.FalseString)
+                    Case Else
+                      CallByName(Me, pi.Name, CallType.Let, String.Empty)
+                  End Select
+                Else
+                  CallByName(Me, pi.Name, CallType.Let, v.Item(pi.Name))
+                End If
+              End If
+            Catch ex As Exception
+            End Try
+          End If
+        Next
+      Catch ex As Exception
+      End Try
+    End Sub
   End Class
 End Namespace

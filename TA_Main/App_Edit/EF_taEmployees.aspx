@@ -180,7 +180,7 @@
             Runat="Server" />
           <asp:Label
             ID = "F_TAVerifier_Display"
-            Text='<%# Eval("HRM_Employees18_EmployeeName") %>'
+            Text='<%# Eval("HRM_Employees6_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
           <AJX:AutoCompleteExtender
@@ -221,7 +221,7 @@
             Runat="Server" />
           <asp:Label
             ID = "F_TAApprover_Display"
-            Text='<%# Eval("HRM_Employees19_EmployeeName") %>'
+            Text='<%# Eval("HRM_Employees7_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
           <AJX:AutoCompleteExtender
@@ -260,7 +260,7 @@
             Runat="Server" />
           <asp:Label
             ID = "F_TASanctioningAuthority_Display"
-            Text='<%# Eval("HRM_Employees20_EmployeeName") %>'
+            Text='<%# Eval("HRM_Employees9_EmployeeName") %>'
             CssClass="myLbl"
             Runat="Server" />
           <AJX:AutoCompleteExtender

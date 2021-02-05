@@ -32,11 +32,28 @@
           SGSTAmount.value = (parseFloat(SGSTRate.value) * parseFloat(AssessableValue.value) * 0.01).toFixed(2);
         if (parseFloat(CGSTRate.value) > 0)
           CGSTAmount.value = (parseFloat(CGSTRate.value) * parseFloat(AssessableValue.value) * 0.01).toFixed(2);
+        SGSTAmount.value = CGSTAmount.value;
         TotalGST.value = (parseFloat(CessAmount.value) + parseFloat(IGSTAmount.value) + parseFloat(SGSTAmount.value) + parseFloat(CGSTAmount.value)).toFixed(2);
         TotalAmount.value = (parseFloat(AssessableValue.value) + parseFloat(TotalGST.value)).toFixed(2);
       } catch (e) { }
     }
   </script>
+<script>
+  function validateSave() {
+    if (!$get('F_BoardingProvided').checked
+        && !$get('F_LodgingProvided').checked
+        && !$get('F_StayedInHotel').checked
+        && !$get('F_StayedAtSite').checked
+        && !$get('F_NotStayedAnyWhere').checked
+        && !$get('F_StayedInGuestHouse').checked
+        && !$get('F_StayedWithRelative').checked
+        ) {
+      alert('Pl. select atleast one STAY option.');
+      return false;
+    }
+    return true;
+  }
+</script>
 
   <div id="div1" class="ui-widget-content page">
 <div id="div2" class="caption">
@@ -292,6 +309,7 @@
         <td>
           <asp:CheckBox ID="F_BoardingProvided"
            Checked='<%# Bind("BoardingProvided") %>'
+           ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -301,6 +319,7 @@
         <td>
           <asp:CheckBox ID="F_LodgingProvided"
            Checked='<%# Bind("LodgingProvided") %>'
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -312,6 +331,7 @@
         <td>
           <asp:CheckBox ID="F_StayedWithRelative"
            Checked='<%# Bind("StayedWithRelative") %>'
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -323,6 +343,7 @@
            Checked='<%# Bind("StayedInHotel") %>' 
            AutoPostBack="true"
            OnCheckedChanged="StayedInHotel_CheckedChanged"
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -334,6 +355,7 @@
         <td>
           <asp:CheckBox ID="F_StayedAtSite"
            Checked='<%# Bind("StayedAtSite") %>'
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -343,6 +365,7 @@
         <td>
           <asp:CheckBox ID="F_StayedInGuestHouse"
            Checked='<%# Bind("StayedInGuestHouse") %>'
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -354,6 +377,7 @@
         <td>
           <asp:CheckBox ID="F_NotStayedAnyWhere"
            Checked='<%# Bind("NotStayedAnyWhere") %>'
+            ClientIDMode="Static"
            CssClass = "mychk"
            runat="server" />
         </td>
@@ -488,6 +512,8 @@
                   Width="200px"
                   ValidationGroup = "taBDLodging"
                   CssClass = "myddl"
+                  ClientIDMode="Static"
+
                   Runat="Server" >
                   <asp:ListItem Value="">---Select---</asp:ListItem>
                   <asp:ListItem Value="Purchase from Registered Dealer">Registered Dealer-ITC</asp:ListItem>
@@ -524,6 +550,7 @@
                     CssClass="myddl"
                     ValidationGroup = "taBDLodging"
                     RequiredFieldErrorMessage="<div class='errorLG'>Required!</div>"
+                    ClientIDMode="Static"
                     Runat="Server" />
                 </td>
               </tr>
@@ -592,6 +619,7 @@
                     SetFocusOnError="true" />
                 </td>
               </tr>
+
               <tr>
                 <td class="alignright">
                   <asp:Label ID="L_SupplierGSTINNo" runat="server" Text="Supplier  GSTIN No :" />&nbsp;
@@ -606,6 +634,7 @@
                     MaxLength="50"
                     Width="408px"
                     ValidationGroup = "taBDLodging"
+                    ClientIDMode="Static"
                     runat="server" />
                   <asp:RequiredFieldValidator
                     ID="RFVSupplierGSTINNo"
@@ -615,6 +644,7 @@
                     Display="Dynamic"
                     EnableClientScript="true"
                     ValidationGroup = "taBDLodging"
+                    ClientIDMode="Static"
                     SetFocusOnError="true" />
                 </td>
                 <td class="alignright">
@@ -695,12 +725,13 @@
                   <asp:TextBox ID="F_CGSTRate"
                     Text='<%# Bind("CGSTRate") %>'
                     Width="168px"
-                    CssClass="mytxt"
+                    CssClass="dmytxt"
                     Style="text-align: Right"
                     ValidationGroup="spmtSupplierBill"
                     MaxLength="20"
                     onfocus="return this.select();"
                     onblur="return validate_tots(this,2);"
+                    Enabled="false"
                     runat="server" />
                 </td>
                 <td class="alignright">
@@ -727,12 +758,13 @@
                   <asp:TextBox ID="F_SGSTRate"
                     Text='<%# Bind("SGSTRate") %>'
                     Width="168px"
-                    CssClass="mytxt"
+                    CssClass="dmytxt"
                     Style="text-align: Right"
                     ValidationGroup="spmtSupplierBill"
                     MaxLength="20"
                     onfocus="return this.select();"
                     onblur="return validate_tots(this,2);"
+                    Enabled="false"
                     runat="server" />
                 </td>
                 <td class="alignright">
@@ -746,12 +778,13 @@
                     onfocus="return this.select();"
                     onblur="return validate_tots(this,2);"
                     Width="168px"
-                    CssClass="mytxt"
+                    CssClass="dmytxt"
                     Style="text-align: right"
+                    Enabled="false"
                     runat="server" />
                 </td>
               </tr>
-              <tr>
+              <tr style="display:none;">
                 <td class="alignright">
                   <asp:Label ID="L_CessRate" runat="server" Text="Cess % [Rate] :" />
                 </td>
